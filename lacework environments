@@ -1,0 +1,204 @@
+Introduction
+This page tracks all Lacework environments, including Kubernetes clusters which power the environments.
+
+Types of Environment
+Normally an environment can be one of the following types:
+
+
+
+prodn	Production	The environment type is serving or fully capable (for standby production environments) to serve Lacework production customers. 
+preprod	Pre-production	The environment type is very similar to the production type but does not serve real customers. The type is used for final pre-flight tests before new software is deployed in production.
+devtest	Development and testing	This type is normally associated with non-production environments used to develop and test the Lacework software
+
+
+One major difference between prodn/preprod and devtest environments:
+
+All devtest environments use completely isolated data storage layers (Kinesis, Aurora, S3 buckets, Snowflake) 
+Prodn environments (prodn1, prodn2, prodn3) use a shared data storage layer (so-called "master" environment) so data processing services should be active only in one environments (this complicates the upgrade/deployment process)
+Preprod environments (for now only preprod1) also use a shared storage layer (separate from prodn and other devtest environments)
+"Master" Environments
+In the situation when two or more environments can share the same set of stateful resources (like AWS S3 buckets, Aurora database, etc) the names of shared resources use so called "master" name. In all devtest environments the "master" name matches the name of the environment. The following are some exceptions:
+
+prodn	prodn1, prodn2 and prodn3	
+preprod	preprod1	
+staging	staging1	
+The master names are normally used as prefixes for shared resources. For example:
+
+Non-shared S3 bucket managed by QA3 environment only: qa3-collector-lacework
+Shared S3 bucket used by both PRODN1 and PRODN2 production environments: prodn-collector-lacework
+Production Environments
+
+prodn1	
+Main production environment (it runs all production services, including batch processing jobs)
+
+prodn2	Hot standby cluster for batch processing tasks running in prodn1 environment; active-active cluster (with prodn1) for agent data receiving pipeline (up to the storage in Kinesis).
+prodn3	The environment hosts Beta version of Rainbow service (beta.lacework.net) only - it does not receive agent traffic or run any batch pipeline jobs
+Development Environments
+The following environments can be temporarily used (locked) by developers for testing of specific production features.
+
+Developers need to use the following rules to lock an environment:
+
+A development environment should be requested for a defined period of time (suggested 2-3 weeks) with ability to extend the locking period
+The following table should be used by developers to manage a record of who is using which environment for how long and for what purpose
+After the lock period for an environment has expired any developer can take it for testing (following the same locking procedure)
+As a curtesy, please contact the current lock owner to make sure he/she no longer needs the environment
+Locks should be per component so several developers can use the same environment for testing of non-overlapping components 
+
+Locks should be manually extended/updated if the originally specified locking period is not enough
+
+Johnny will review the locks with the team on weekly release meetings (normally held on Fridays)
+
+If there is no available environment to use then escalate to Johnny (or Satya if Johnny is not available)
+
+Development Environment Update Policy
+The environment owner (see table below) is responsible for maintaining the environment.  DevOps will reset an environment to production labels and ensure it is operational under two conditions
+
+When an environment changes owners
+When an environment owner requests to DevOps to reset the environment to production labels.
+All environments will be upgraded to the latest production labels on every database schema change
+
+
+
+
+dev1	3.02	
+
+
+
+
+Michael	
+dev2	3.01	
+
+
+
+Modeling team – Harish	
+ACTIVE by Developers
+dev4	3.02	
+Automated Testing	22 Apr 2020 	22 Jul 2020 	Iris Team	Arpit	
+qa1	3.01	
+
+3/1/2020
+
+
+
+
+
+3/30/2020
+
+
+
+Krishnan
+
+
+
+
+testing
+
+
+
+qa2	v.k8sCpl	Iris, Rainbow, UI, Electra, QS, Shadow QS, Reporting	K8s data collector and k8s compliance	16 Mar 2020 	30 Apr 2020 	Bharath, Divyang, Mandar, Harish	Michael	
+K8s data collector for bandwidth
+
+qa4	
+Iris, Rainbow UI, Electra Int Portal, QS, Shadow QS, Reporting, Alert Notif, Azure/GCP/AWS CFG Analyzer	AWS CT Testing	20 Apr 2020 	30 Apr 2020 	Krishnan	Arpit	AWS_CT testing
+qa5	3.01	
+
+
+
+NO OWNER.  Used by Dev/QA to fork production data	Michael	The environment is using LACEWORK Snowflake account (and not LWDEV as all other devtest environments)
+qa7	3.01	
+Cfg-data-collector, cfg-data-collector-scheduler, queueloader
+
+Asset-Inventory
+
+3/31/2019
+
+5/30/2019
+
+Swathi, 
+
+Sagar  
+
+
+
+
+qa8	3.01	s3-loader 	AgentServer pipeline	
+4/6/2020
+
+4/30/2020
+
+Tasos
+
+
+s3-loader migration to KCL 2.x
+
+qa10	3.02	
+
+
+
+
+
+
+qa11	3.02	
+
+
+
+23 Mar 2020 
+
+30 Apr 2020 	
+
+
+QA Environments
+The following environments are managed by the QA team only. No developer should ever make any changes in the environments without QA permission.
+
+preprod1	preprod	Pre-production testing environment
+staging1	staging	Pre-production testing environment
+qa3	devtest	QA testing environment
+qa9	devtest	India QA testing 
+qa10	devtest	QA testing environment
+TechOps Environments
+qa6	devtest	Arpit	This environment is used by TechOps team as a playground for new feature & bug fixes testing.
+qa1006	devtest	Arpit	DR env of QA6 env - hosted in US-EAST-1 region
+Association of AWS accounts and environments
+DevTest Environment Review
+
+We are doing an environment review for Devtest Lacework Environments. The below table will be used to identify environments that are not in use, not required and can be decommissioned.
+
+
+
+PREPROD1	QA	Required	
+
+STAGING1	QA	Required	
+
+DEV1
+
+DEV	
+Will decommission – any objections?  YES	
+DEV2	DEV	
+
+
+DEV3	DEV	
+Will decommission – any objections?  YES	Decommissioned.   OPS-451 - decommission dev3 CLOSED
+DEV4	DEV	Required	Primary environment for RBAC migration testing	Bharath R
+DEV5	DEV	
+Will decommission – any objections? YES	Decommissioned  OPS-452 - decommission dev5 CLOSED
+QA1	DEV	
+In Use	
+QA2	DEV	
+Will decommission – any objections?  YES	
+QA3	QA	Required	Primary QA env	Satya
+QA4	DEV	Required	Primary environment for RBAC testing	Bharath R
+QA5	DEV	
+
+
+QA6	DevOps	Required	This environment acts as the Playground for the DevOps team and is used daily.	Arpit Airan
+QA7	DEV	Required	Environment for LQL Testing 	Swathi 
+QA8	DEV	Required	AgentServer pipeline testing	Tasos
+QA9	QA	Required	India QA env	
+QA10	QA	
+Will decommission – any objections? – Sumeet to confirm	
+QA11	DEV	Required	Will decommission – any objections?  – Check with Hank - please do not decommission
+
+QA1006	DevOps	Not Required	The environment was created for DR Project. However, we are not working on it as of now so we can STOP it till we start working on the DR project again. It is only running Aurora Read Replica for QA6 Environment.	
+Arpit Airan
+
+Decommissioned  OPS-442 - decommission qa1006 CLOSED
