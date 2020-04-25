@@ -1,0 +1,32 @@
+today_epoch="$(date +%s)"
+        expire_date1=`openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-server-ca.pem -noout -dates | awk -F= '/^notAfter/ { print $2; exit }'`
+        expire_date2=`openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-server.pem -noout -dates | awk -F= '/^notAfter/ { print $2; exit }'`
+        expire_date3=`openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-agent.pem -noout -dates | awk -F= '/^notAfter/ { print $2; exit }'`
+        echo "$expire_date1"
+        echo "$expire_date2"
+        echo "$expire_date3"
+        expire_epoch1=$(date +%s -d "$expire_date1")
+        expire_epoch2=$(date +%s -d "$expire_date2")
+        expire_epoch3=$(date +%s -d "$expire_date3")
+        echo "$expire_date1"
+        echo "$expire_date2"
+        echo "$expire_date3"
+        timeleft1=`expr $expire_epoch1 - $today_epoch`
+        timeleft2=`expr $expire_epoch2 - $today_epoch`
+        timeleft3=`expr $expire_epoch3 - $today_epoch`
+        echo "$timeleft1"
+        echo "$timeleft2"
+        echo "$timeleft3"
+        Number_of_months1=`expr $(( timeleft1 / 2592000 ))`
+        Number_of_months2=`expr $(( timeleft2 / 2592000 ))`
+        Number_of_months3=`expr $(( timeleft3 / 2592000 ))`
+        echo "$Number_of_months1"
+        echo "$Number_of_months2"
+        echo "$Number_of_months3"
+        if [[ $Number_of_months1 > 10 && $Number_of_months2 > 10 && $Number_of_months3 > 10 ]]
+           then
+              echo "valid cert"
+
+           else
+              echo "invalid cert"
+        fi
