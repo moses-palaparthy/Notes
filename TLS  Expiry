@@ -1,0 +1,23 @@
+#!/bin/bash
+
+        today_epoch="$(date +%s)"
+        for i in $TLS_CERT_FILE_DIR/kiam-agent.pem $TLS_CERT_FILE_DIR/kiam-server-ca.pem $TLS_CERT_FILE_DIR/kiam-server.pem
+        do
+        expire_date=`openssl x509 -in $i -noout -dates | awk -F= '/^notAfter/ { print $2; exit }'`
+        #echo "Expiry date : $i : $expire_date"
+        expire_epoch=$(date +%s -d "$expire_date")
+        #timeleft=`expr $(( expire_epoch - today_epoch ))`
+        timeleft_in_months=`expr $(( expire_epoch - today_epoch / 2592000 ))`
+        #Number_of_months=`expr $(( timeleft / 2592000 ))`
+        #echo "CERT $i : expire after : $Number_of_months months"
+        #echo "The time in seconds left for expiry is $timeleft"
+        if [ $timeleft_in_months > 10 ]
+        then
+       # echo "CERT $i : is valid cert : expiry date : $expire_date "
+          echo “$expire_date CERT $I : is valid cert”
+        else
+        #echo "CERT $i : is invalid cert : expiry date : $expire_date"
+           echo “$expire_date CERT $I : is invalid cert”
+        fi
+        done
+
