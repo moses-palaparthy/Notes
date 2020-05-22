@@ -1,0 +1,76 @@
+cat rbac-config.yaml
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+
+
+kubectl create -f rbac-config.yaml
+
+Output:
+      serviceaccount/tiller created
+      clusterrolebinding.rbac.authorization.k8s.io/tiller created
+
+kubectl -n kube-system get serviceaccount
+
+
+Output:
+          NAME                                                        SECRETS   AGE
+          attachdetach-controller                              1         39m
+          aws-cloud-provider                                     1         39m
+          calico-node                                                  1         38m
+          certificate-controller                                   1         39m
+          clusterrole-aggregation-controller            1         38m
+          cronjob-controller                                        1         39m
+          daemon-set-controller                                1         39m
+          default                                                          1         38m
+          deployment-controller                                 1         39m
+          disruption-controller                                    1         39m
+          dns-controller                                               1         38m
+          endpoint-controller                                      1         38m
+          expand-controller                                        1         38m
+          generic-garbage-collector                          1         39m
+          horizontal-pod-autoscaler                          1         38m
+          job-controller                                                1         38m
+          kube-dns                                                       1         38m
+          kube-dns-autoscaler                                    1         38m
+          kube-proxy                                                    1         38m
+          namespace-controller                                  1         39m
+          node-controller                                             1         39m
+          persistent-volume-binder                             1         38m
+          pod-garbage-collector                                 1         38m
+          pv-protection-controller                               1         38m
+          pvc-protection-controller                             1         38m
+          replicaset-controller                                     1         38m
+          replication-controller                                    1         39m
+          resourcequota-controller                             1         39m
+          service-account-controller                          1         39m
+          service-controller                                         1         38m
+          statefulset-controller                                   1         39m
+          tiller                                                               1         2m2s
+          ttl-controller                                                 1         39m
+
+
+Now initiate the tiller on kubernetes cluster
+
+helm-2.13.1 init --service-account tiller
+
+
+To ensure that it has actually setup the tiller on kubernetes cluster run the following command.
+
+kubectl -n kube-system get pods
