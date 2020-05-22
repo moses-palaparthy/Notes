@@ -1,0 +1,82 @@
+provider "aws" {
+        access_key = "AKIAREV5AUGKSVWN6Q42"
+        secret_key = "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"
+        region = "ap-south-1"
+}
+
+resource "aws_instance" "ServiceVM" {
+        ami = "ami-54d2a63b"
+        instance_type = "t2.micro"
+        security_groups = ["${aws_security_group.service_sg.name}"]
+#       tags {
+#               Name = "ServiceVM"
+#       }
+
+}
+
+resource "aws_db_instance" "postgreSQL_db" {
+  allocated_storage       = 20
+  storage_type            = "gp2"
+  engine                  = "postgres"
+  engine_version          = "11.5"
+  instance_class          = "db.t2.micro"
+  name                    = "mysqldb"
+  username                = "postgres"
+  password                = "postgres"
+  parameter_group_name    = "default.postgres11"
+}
+
+resource "aws_security_group" "service_sg" {
+  name        = "service_sg"
+  description = "Create a Security group for create EC2 instance"
+  vpc_id      = "vpc-46f6b12e"
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
