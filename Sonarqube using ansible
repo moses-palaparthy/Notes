@@ -1,0 +1,102 @@
+---
+- hosts: node
+  become: true
+  tasks:
+
+    - name: Installing Java packages
+      package: name={{item}} state=present
+      with_items:
+        - default-jdk
+        - unzip
+        - python3-psycopg2
+
+    - name: Download SonarQube
+      get_url:
+        url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.3.0.34182.zip"
+        dest: "/opt/sonarqube-8.3.0.34182.zip"
+
+    - name: Extract SonarQube
+      unarchive:
+        src: "/opt/sonarqube-8.3.0.34182.zip"
+        dest: "/opt"
+        copy: no
+        owner: sonar
+
+    - name: Link this version of sonarqube as the server SonarQube version
+      file:
+        src: "/opt/sonarqube-8.3.0.34182"
+        dest: "/opt/sonarqube"
+        state: link
+        owner: sonar
+
+    - name: Install PostgreSQL
+      apt: name={{ item }} update_cache=true state=present
+      with_items:
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
+      tags: packages
+
+
+    - name: Ensure the PostgreSQL service is running
+      service: name=postgresql state=started enabled=yes
+
+
+    - name: Create the sonar user for running the SonarQube services
+      user:
+        name: sonar
+        comment: System user for running SonarQube
+
+
+    - name: Setting to access to the data base and configurations.
+      blockinfile:
+        path: /opt/sonarqube/conf/sonar.properties
+        block: |
+          sonar.jdbc.url=jdbc:postgresql://sonarqubedb.c93fn3r4dfar.ap-south-1.rds.amazonaws.com:5432/sonarqube
+          sonar.jdbc.username=sonar
+          sonar.jdbc.password=sonar
+          sonar.path.data=/opt/sonarqube/data
+          sonar.path.temp=/opt/sonarqube/temp
+          sonar.web.host=13.233.94.182
+          sonar.web.port=9000
+          sonar.web.context=/opt/sonarqube
+
+
+    - name: update sysctl vm.max_map_count
+      sudo: yes
+      sysctl:
+        name: vm.max_map_count
+        value: 262144
+        state: present
+
+    - name: update sysctl fs.file-maxcount
+      sudo: yes
+      sysctl:
+        name: fs.file-max
+        value: 65536
+        state: present
+
+    - name: Setting up configurations /etc/security/limits.conf path.
+      blockinfile:
+        path: /etc/security/limits.conf
+        block: |
+          sonarqube   -   nofile   65536
+          sonarqube   -   nproc    4096
+
+
+    - name: change permissions on the directory
+      become: true
+      become_user: root
+      shell: ps -aux |grep sonarqube
+
+    - name: Run command if /path/to/database does not exist (with 'cmd' parameter).
+      command:
+         cmd: chown -R sonar /opt/sonarqube
+         warn: False
+
+
+    - name: login as ubuntu and run this command
+      become_user: sonar
+      command:
+          cmd: /opt/sonarqube/bin/linux-x86-64/sonar.sh start
+    
