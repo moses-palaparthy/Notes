@@ -1,0 +1,47 @@
+#!/bin/bash
+
+which git > /dev/null
+if ($status == 0) then
+    echo git found
+
+else
+    echo git not found
+    apt-get install git -y
+    git --version
+
+fi
+  
+function userpasswrdlogin () {
+
+        echo "Kindly enter username for git account"
+        read -p 'Username: '
+        echo "Kindly enter password for git account"
+        read -sp 'Password: '
+        echo $uservar
+        git clone https://github.com/mosespalaparthy/shippable-EC2-Access-Repo.git
+
+     }
+
+function letmecreate () {
+
+        ssh-keygen -o -b 4096 -t rsa
+        cat /root/.ssh/id_rsa
+        echo "Copy the key to your github account"
+        echo "Paste the key at Github/Settings/SSH and GPG Keys"
+        echo "Then click add to ssh keys"
+
+     }
+
+clear
+echo --------------------------------------------- 
+echo "Kindly Enter Your Choice" 
+echo --------------------------------------------- 
+echo 1.Want to aceess repository using username and password
+echo 2.Let me setup git at my own
+echo Enter your choice 
+read choice
+case $choice in
+        1)userpasswrdlogin;;
+        2)letmecreate;;
+
+esac
