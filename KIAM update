@@ -1,0 +1,45 @@
+Environments to update -
+1. DEV1 
+2. DEV2 
+3. DEV4 
+4. QA1 
+5. QA2 
+6. QA4 
+7. QA6 
+8. QA7 
+9. QA8 
+10. QA9 
+11. QA10 
+12. QA11 
+13. STAGING1 
+Steps to perform -  
+* Check the KIAM logs for error messages. Error messages should be visible. kubetail kiam -n kube-system -s 1m | grep "certificate has expired or is not yet valid"
+
+
+* Copy the new cert files from /home/moses/.lacework/qa6 to respective environment directory in /home/moses/.lacework/. 
+Check if the expiry date is for at least 1 year in the future.
+
+* openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-agent.pem
+* openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-server-ca.pem
+* openssl x509 -enddate -noout -in /home/moses/.lacework/qa6/kiam-server.pem 
+* Navigate to ~/lw/k8s/system 
+Source the credentials file by executing the following command
+
+source a qa6
+
+Execute the following command 
+
+./manage-system.sh update_kiam_tls_secret kiam
+
+Execute the following command
+
+./manage-system.sh restart kiam
+
+Check if all the KIAM pods are up and running
+
+watch "kubectl -n kube-system get pods | grep kiam"
+
+Check the KIAM logs for error messages. Error messages should NOT be visible.
+
+kubetail kiam -n kube-system -s 1m | grep "certificate has expired or is not yet valid"
+
