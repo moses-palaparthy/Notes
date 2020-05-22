@@ -1,0 +1,33 @@
+helm create sample chart
+
+Ls
+   
+Chart.yaml	charts		templates	values.yaml
+
+
+helm-2.13.1 install --name helm.test1 ./samplechart --set service.type=LoadBalancer
+
+
+helm list
+
+
+kubectl get services
+    
+        helm-test1.samplechart
+
+
+Then you get a external ip then copy it and add it to curl
+
+
+curl 192.168.0.1
+
+         then you get nginx welcome page which means the service is up-end running
+
+
+You can also check through following commands
+
+kubectl get pods
+
+kubectl get deployments
+
+
